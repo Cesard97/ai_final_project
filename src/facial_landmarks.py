@@ -19,12 +19,11 @@ args = vars(ap.parse_args())
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(args["shape_predictor"])
 camara = cv2.VideoCapture(0)
-# load the input image, resize it, and convert it to grayscale
-
 
 
 while True:
 	(grabbed, image) = camara.read()
+	print(image)
 	image = imutils.resize(image, width=500)
 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
