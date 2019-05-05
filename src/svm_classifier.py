@@ -4,7 +4,6 @@ import rospy
 from sklearn.neighbors import KNeighborsClassifier
 from std_msgs.msg import Float32MultiArray, Int16
 import glob
-from sklearn import svm
 import numpy as np
 import scipy.io as sc
 
@@ -14,12 +13,6 @@ mediaP = []
 vectorClassifier = []
 matrixVectors = []
 clf = 0
-svm_angry_model = None
-svm_disgust_model = None
-svm_fear_model = None
-svm_happy_model = None
-svm_neutral_model = None
-svm_sad_model = None
 
 
 def features_callback(data):
@@ -27,18 +20,14 @@ def features_callback(data):
     charac_vector = data.data
 
 
-def k_neighbors():
-    rospy.init_node('k_neighbors', anonymous=False)
+def svm_classifier():
+    rospy.init_node('svm_classifier', anonymous=False)
     rospy.Subscriber('features', Float32MultiArray, features_callback)
-    pub = rospy.Publisher('KN_response', Int16, queue_size=10)
+    pub = rospy.Publisher('SVM_response', Int16, queue_size=10)
     rate = rospy.Rate(10)
     x, y = training_data_prep()
-    svm_angry_model = svm_model(1, x, y)
-    svm_disgust_model = svm_model(2, x, y)
-    svm_fear_model = svm_model(3, x, y)
-    svm_happy_model = svm_model(4, x, y)
-    svm_neutral_model = svm_model(5, x, y)
-    svm_sad_model = svm_model(6, x, y)
+    neigh = KNeighborsClassifier(n_neighbors=2)
+    neigh.fit(x, np.transpose(y))
     #a = 50
     #charac_vector = np.transpose(x[a, :])
     #print(charac_vector.shape)
@@ -48,13 +37,8 @@ def k_neighbors():
         if not (charac_vector == []):
             print(len(charac_vector))
             print(charac_vector)
-            angry = svm_happy_model.predict(charac_vector)
-            disgut = svm_happy_model.predict(charac_vector)
-            fear = svm_happy_model.predict(charac_vector)
-            happy = svm_happy_model.predict(charac_vector)
-            neutral = svm_happy_model.predict(charac_vector)
-            sad = svm_happy_model.predict(charac_vector)
-            
+            emotion = neigh.predict(charac_vector)
+            print(emotion)
             pub.publish(emotion)
         rate.sleep()
 
@@ -124,17 +108,6 @@ def training_data_prep():
     matrixVectors = np.asanyarray(matrixVectors)
     vectorClassifier = np.asanyarray(vectorClassifier)
     return matrixVectors[:, :, 0], vectorClassifier
-
-
-def svm_model(num, x, y):
-    for i in range(0, len(y)):
-        if not(y(i) == num):
-            y[i] = 0
-        else:
-            y[i] = 1
-    model = svm.LinearSVC(random_state=0, tol=1e-5)
-    model.fit(x, y)
-    return model
 
 
 if __name__ == '__main__':
