@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # USAGE
 # python facial_landmarks.py --shape-predictor shape_predictor_68_face_landmarks.dat --image images/example_01.jpg
 
@@ -9,7 +10,6 @@ from cv_bridge import CvBridge, CvBridgeError
 from sklearn import preprocessing
 import numpy as np
 import rospy
-import imutils
 import dlib
 import cv2
 
@@ -30,10 +30,10 @@ class preProcesing:
         detector = dlib.get_frontal_face_detector()
         predictor = dlib.shape_predictor('shape_predictor.dat')
         # Node init
-        rospy.init_node('preProccesing', anonymous=True)
+        rospy.init_node('pre_proccesing', anonymous=True)
         # Pub and Subs
-        pubFeatures = rospy.Publisher('features', Float32MultiArray, queue_size=10)
-        rospy.Subscriber("/naoqi_driver/camera/bottom/image_raw", Image, self.cameraCallback)
+        pubFeatures = rospy.Publisher('features', Float32MultiArray, queue_size=100)
+        rospy.Subscriber("/naoqi_driver/camera/front/image_raw", Image, self.cameraCallback)
         # Vector
         featureVector = Float32MultiArray()
         preProcessLandmarks = np.zeros((136,1))
@@ -72,10 +72,9 @@ class preProcesing:
                 preProcessLandmarks[i] = (self.landmarks[i-68,1])
 
             preProcessLandmarks = preprocessing.scale(preProcessLandmarks)
-
-            print(preProcessLandmarks)
             featureVector.data = preProcessLandmarks
             pubFeatures.publish(featureVector)
+            print(featureVector)
 
 
             # show the output image with the face detections + facial landmarks
