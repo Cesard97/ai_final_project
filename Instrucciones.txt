@@ -1,0 +1,23 @@
+1. Prender a Pepper y pedirle la IP
+
+2. En un PC conectarse a la misma red de Pepper, abrir una terminal y escribir
+ssh nao@LaIpDelRobot
+
+3. En esa terminal hacer
+nano setup.bash
+
+4. Cambiar el valor de las variables de entorno en el setup
+
+export ROS_MASTER_URI=http://localhost:11311
+export ROS_HOSTNAME=IpDelRobot
+export ROS_IP=IpDelRobot
+
+5. Hacer source del setup
+source ros/setup.bash
+
+6. Lanzar el naoqi_driver (no es necesario hacer roscore)
+
+roslaunch naoqi_driver naoqi_driver.launch nao_ip:=IpDelRobot roscore_ip:=localhost network_interface:=wlan0
+
+Notas: Acuérdense que si está dormida, Ópera no publica nada en los tópicos
+Y recuerden no dejarla con los motores energizados (erguida) mucho tiempo... cuando no la estén usando pónganla a descansar
