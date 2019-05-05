@@ -1,11 +1,12 @@
-# USAGE
-# python facial_landmarks.py --shape-predictor shape_predictor_68_face_landmarks.dat --image images/example_01.jpg 
-
+#!/usr/bin/env python
+# license removed for brevity
 # import the necessary packages
 from imutils import face_utils
-from sensor_msgs import Image
-from std_msgs import Float32MultiArray
-import mat4py
+from std_msgs.msg import Float32, Float32MultiArray
+from cv_bridge import CvBridge, CvBridgeError
+from sensor_msgs.msg import Image
+import scipy.io as sio
+import numpy as np
 import rospy
 import imutils
 import dlib
@@ -15,36 +16,28 @@ import cv2
 class dataTraining:
 
 	def __init__(self):
-		self.image = 0
+		self.image = np.zeros((500, 500, 3), np.uint8)
 		self.vector = 0
-		self.clase = "happy"
+		self.clase = "angry"
+		self.bridge = CvBridge()
 
-	def camaraCallBack(msg):
-		global image
-		image = msg.data
-		pass
+	def camaraCallBack(self, img):
+		self.image = self.bridge.imgmsg_to_cv2(img, "bgr8")
+		#self.image = imutils.resize(self.image, width=500)
+		print('imagenIn')
 
-	def faturesCallBack(msg):
-		global vector
-		vector = msg.data
-		pass
+	def faturesCallBack(self, msg):
+		self.vector = msg.data
+		print('vectorIn')
 
-	def showLandMarks():
-		global image
-		global vector
-		global clase
+	def showLandMarks(self):
 		id = 0
-		# initialize dlib's face detector (HOG-based) and then create
-		# the facial landmark predictor
 		detector = dlib.get_frontal_face_detector()
-		predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
-		camara = cv2.VideoCapture(0)
-		# load the input image, resize it, and convert it to grayscale
-
+		print('noshape')
+		predictor = dlib.shape_predictor('shape_predictor.dat')
+		print('shape')
 		while True:
-			(grabbed, image) = camara.read()
-			image = imutils.resize(image, width=500)
-			gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+			gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
 
 			# detect faces in the grayscale image
 			rects = detector(gray, 1)
@@ -60,27 +53,29 @@ class dataTraining:
 				# convert dlib's rectangle to a OpenCV-style bounding box
 				# [i.e., (x, y, w, h)], then draw the face bounding box
 				(x, y, w, h) = face_utils.rect_to_bb(rect)
-				cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+				cv2.rectangle(self.image, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
 				# show the face number
-				cv2.putText(image, "Face #{}".format(i + 1), (x - 10, y - 10),
+				cv2.putText(self.image, "Face #{}".format(i + 1), (x - 10, y - 10),
 					cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
 
 				# loop over the (x, y)-coordinates for the facial landmarks
 				# and draw them on the image
 				for (x, y) in shape:
-					cv2.circle(image, (x, y), 1, (0, 255, 0), -1)
+					cv2.circle(self.image, (x, y), 1, (0, 255, 0), -1)
 
 			# show the output image with the face detections + facial landmarks
-			cv2.imshow("Output", image)
+			cv2.imshow("Output", self.image)
+
 			key = cv2.waitKey(1) & 0xFF
 			if key == ord("t"):
-				mat4py.savemat(clase+'_vector_'+str(id)'_.mat', vector)
+				dic = {'faceCoordinatesUnwarped':self.vector}
+				sio.savemat('training_data/'+self.clase+'/'+self.clase +'_vector_'+str(id)+'_.mat', dic)
 				id = id + 1
+				print('Guardando vector')
+
 			if key == ord("q"):
 				break
-
-		camara.release()
 		cv2.destroyAllWindows()
 
 
@@ -88,7 +83,12 @@ class dataTraining:
 		rospy.init_node('data_training', anonymous = True)
 		rospy.Subscriber('/naoqi_driver/camera/front/image_raw', Image, self.camaraCallBack)
 		rospy.Subscriber('features', Float32MultiArray, self.faturesCallBack)
-		self.showLandMarks
+		rate = rospy.Rate(10)
+		print('no ha entrado')
+		while not rospy.is_shutdown():
+			self.showLandMarks()
+			rate.sleep()
 	
 if __name__ == '__main__':
-	data_training_py()
+	data = dataTraining()
+	data.data_training_py()
