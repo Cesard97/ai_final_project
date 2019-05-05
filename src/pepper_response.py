@@ -49,40 +49,9 @@ def kn_callback(data):
     kn = data.data
 
 
-def svm_angry_callback(data):
+def svm_callback(data):
     global svm
-    if data.data == 1:
-        svm = 1
-
-
-def svm_happy_callback(data):
-    global svm
-    if data.data == 1:
-        svm= 4
-
-
-def svm_fear_callback(data):
-    global svm
-    if data.data == 1:
-        svm = 3
-
-
-def svm_sad_callback(data):
-    global svm
-    if data.data == 1:
-        svm = 6
-
-
-def svm_disgust_callback(data):
-    global svm
-    if data.int16 == 1:
-        svm = 2
-
-
-def svm_neutral_callback(data):
-    global SVM_response
-    if data == 1:
-        SVM_response = 5
+    svm = data.data
 
 
 def compute_votes():
@@ -101,9 +70,8 @@ def compute_votes():
     happy = response.count(4)
     neutral = response.count(5)
     sad = response.count(6)
-    happy = 2
-    list = [angry, disgust, fear, happy, neutral, sad]
-    emotion = np.argmax(list) + 1
+    votes = [angry, disgust, fear, happy, neutral, sad]
+    emotion = np.argmax(votes) + 1
     print(response)
     return emotion
 
@@ -113,12 +81,7 @@ def pepper_node():
     rospy.Subscriber('gnc_response', Int16, gnc_callback)
     rospy.Subscriber('NN_response', Int16, nn_callback)
     rospy.Subscriber('KN_response', Int16, kn_callback)
-    rospy.Subscriber('SVM_angry_response', Int16, svm_angry_callback)
-    rospy.Subscriber('SVM_happy_response', Int16, svm_happy_callback)
-    rospy.Subscriber('SVM_sad_response', Int16, svm_sad_callback)
-    rospy.Subscriber('SVM_fear_response', Int16, svm_fear_callback)
-    rospy.Subscriber('SVM_disgust_response', Int16, svm_disgust_callback)
-    rospy.Subscriber('SVM_neutral_response', Int16, svm_neutral_callback)
+    rospy.Subscriber('SVM_response', Int16, svm_callback)
     pub = rospy.Publisher('speech', String, queue_size=10)
     rate = rospy.Rate(10)
 
