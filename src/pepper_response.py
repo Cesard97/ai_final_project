@@ -10,10 +10,10 @@ gnc = 0
 nn = 0
 kn = 0
 svm = 0
-w_gnc = 2
-w_nn = 2
+w_gnc = 1
+w_nn = 1
 w_svm = 1
-w_kn = 2
+w_kn = 1
 say_angry = ["Oh! Veo que estas bravo... Comete una snickers",
              'No estes de mal genio... La vida es una sola...',
              'No te pongas bravo! se te arrugara la frente']
