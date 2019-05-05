@@ -28,9 +28,10 @@ def k_neighbors():
     x, y = training_data_prep()
     neigh = KNeighborsClassifier(n_neighbors=2)
     neigh.fit(x, np.transpose(y))
-    charac_vector = np.transpose(x[722, :])
+    a = 50
+    charac_vector = np.transpose(x[a, :])
     print(charac_vector.shape)
-    print(y[722])
+    print(y[a])
     while not rospy.is_shutdown():
         emotion = neigh.predict(charac_vector)
         print(emotion)
