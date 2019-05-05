@@ -36,46 +36,46 @@ say_sad = ['No estes triste. Te daria un abrazo, pero no control bien mis movimi
 
 def gnc_callback(data):
     global gnc
-    gnc = data
+    gnc = data.data
 
 
 def nn_callback(data):
     global nn
-    nn = data
+    nn = data.data
 
 
 def kn_callback(data):
     global kn
-    kn = data
+    kn = data.data
 
 
 def svm_angry_callback(data):
     global svm
-    if data == 1:
+    if data.data == 1:
         svm = 1
 
 
 def svm_happy_callback(data):
     global svm
-    if data == 1:
+    if data.data == 1:
         svm= 4
 
 
 def svm_fear_callback(data):
     global svm
-    if data == 1:
+    if data.data == 1:
         svm = 3
 
 
 def svm_sad_callback(data):
     global svm
-    if data == 1:
+    if data.data == 1:
         svm = 6
 
 
 def svm_disgust_callback(data):
     global svm
-    if data == 1:
+    if data.int16 == 1:
         svm = 2
 
 
