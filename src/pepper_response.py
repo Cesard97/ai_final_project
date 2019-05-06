@@ -10,8 +10,8 @@ gnc = 0
 nn = 0
 kn = 0
 svm = 0
-w_gnc = 2
-w_nn = 2
+w_gnc = 0
+w_nn = 0
 w_svm = 1
 w_kn = 2
 say_angry = ["Oh! Veo que estas bravo... Comete una snickers",
@@ -64,6 +64,7 @@ def compute_votes():
         response.append(kn)
     for i in range(0, w_svm):
         response.append(svm)
+
     angry = response.count(1)
     disgust = response.count(2)
     fear = response.count(3)

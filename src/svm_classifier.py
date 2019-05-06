@@ -23,7 +23,7 @@ def features_callback(data):
 def svm_classifier():
     rospy.init_node('svm_classifier', anonymous=False)
     rospy.Subscriber('features', Float32MultiArray, features_callback)
-    pub = rospy.Publisher('SVM_response', Int16, queue_size=10)
+    pub = rospy.Publisher('SVM_response', Int16, queue_size=1)
     rate = rospy.Rate(10)
     x, y = training_data_prep()
     svm_angry_model = svm_model(1, x, y)
@@ -116,7 +116,11 @@ def training_data_prep():
 
         landmark = sc.loadmat(element)
         vTem = landmark['faceCoordinatesUnwarped']
-        aux = (np.dot(vTem[0], mediaP.T) / (np.dot(vTem, vTem.T)))
+        if vTem.shape == (136, 1):
+            vTem = vTem.T
+        aux1 = np.dot(vTem, mediaP.T)
+        aux2 = (np.dot(vTem, vTem.T))
+        aux = aux1 / aux2
         vTem = vTem * aux
         vector = vTem[0] - mediaP
         matrixVectors.append(vector)
