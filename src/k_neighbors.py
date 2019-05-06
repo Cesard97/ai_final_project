@@ -7,6 +7,7 @@ import glob
 import numpy as np
 import scipy.io as sc
 
+global nombresLandMark
 charac_vector = []
 nombresLandMark = []
 mediaP = []
@@ -32,13 +33,10 @@ def k_neighbors():
     pub = rospy.Publisher('KN_response', Int16, queue_size=10)
     rate = rospy.Rate(10)
     x, y = training_data_prep()
-    neigh = KNeighborsClassifier(n_neighbors=2)
+    neigh = KNeighborsClassifier(n_neighbors=10)
     neigh.fit(x, np.transpose(y))
     while not rospy.is_shutdown():
-
         if not (charac_vector == []):
-            print(len(charac_vector))
-            print(charac_vector)
             emotion = neigh.predict(charac_vector)
             print(emotion)
             pub.publish(emotion)
@@ -46,26 +44,30 @@ def k_neighbors():
 
 
 def mean():
-    global S, mediaP
+    global S, mediaP, nombresLandMark
     S = 0
-
-    for file in glob.glob("ArchivosSoporteTarea7/ArchivosPunto1/markings/*.mat"):
+    for file in glob.glob("training_data/happy/*.mat"):
+        nombresLandMark.append(file)
+    for file in glob.glob("training_data/angry/*.mat"):
+        nombresLandMark.append(file)
+    for file in glob.glob("training_data/sad/*.mat"):
+        nombresLandMark.append(file)
+    for file in glob.glob("training_data/fear/*.mat"):
+        nombresLandMark.append(file)
+    for file in glob.glob("training_data/disgust/*.mat"):
+        nombresLandMark.append(file)
+    for file in glob.glob("training_data/neutral/*.mat"):
         nombresLandMark.append(file)
 
     for element in nombresLandMark:
         landmark = sc.loadmat(element)
         vTem = landmark['faceCoordinatesUnwarped']
-        media1 = np.mean(vTem[:, 0])
-        media2 = np.mean(vTem[:, 1])
-        vTem[:, 0] = vTem[:, 0] - media1
-        vTem[:, 1] = vTem[:, 1] - media2
-        vTem = np.vectorize(complex)(vTem[:, 0], vTem[:, 1])
-        vTem = vTem / np.linalg.norm(vTem)
         S = S + np.outer(vTem, vTem.conjugate())
 
     [values, vectors] = np.linalg.eig(S)
     index = np.argmax(values)
     mediaP = vectors[:, index]
+    mediaP = mediaP.real
 
 
 def training_data_prep():
@@ -73,43 +75,47 @@ def training_data_prep():
     mean()
     nombresLandMark = []
 
-    for file in glob.glob("ArchivosSoporteTarea7/ArchivosPunto1/markings/*.mat"):
+    for file in glob.glob("training_data/happy/*.mat"):
+        nombresLandMark.append(file)
+    for file in glob.glob("training_data/angry/*.mat"):
+        nombresLandMark.append(file)
+    for file in glob.glob("training_data/sad/*.mat"):
+        nombresLandMark.append(file)
+    for file in glob.glob("training_data/fear/*.mat"):
+        nombresLandMark.append(file)
+    for file in glob.glob("training_data/disgust/*.mat"):
+        nombresLandMark.append(file)
+    for file in glob.glob("training_data/neutral/*.mat"):
         nombresLandMark.append(file)
 
     for element in nombresLandMark:
+
         landmark = sc.loadmat(element)
         vTem = landmark['faceCoordinatesUnwarped']
-        media1 = np.mean(vTem[:, 0])
-        media2 = np.mean(vTem[:, 1])
-        vTem[:, 0] = vTem[:, 0] - media1
-        vTem[:, 1] = vTem[:, 1] - media2
-        vTem = np.vectorize(complex)(vTem[:, 0], vTem[:, 1])
-        vTem = vTem / np.linalg.norm(vTem)
-        vTem = vTem * (np.dot(vTem.conjugate().T, mediaP) / (np.dot(vTem.conjugate().T, vTem)))
-        real = np.array([vTem.real - mediaP.real])
-        imag = np.array([vTem.imag - mediaP.imag])
-        vector = np.concatenate((real.T, imag.T), axis=0)
+        aux = (np.dot(vTem[0], mediaP.T) / (np.dot(vTem, vTem.T)))
+        vTem = vTem * aux
+        vector = vTem[0] - mediaP
         matrixVectors.append(vector)
+
         name = element.split("/")
-        clas = name[3].split("_")
-        if clas[3] == 'a':
+
+        if name[1] == 'angry':
             vectorClassifier.append(1)
-        elif clas[3] == 'd':
+        elif name[1] == 'disgust':
             vectorClassifier.append(2)
-        elif clas[3] == 'f':
+        elif name[1] == 'fear':
             vectorClassifier.append(3)
-        elif clas[3] == 'h':
+        elif name[1] == 'happy':
             vectorClassifier.append(4)
-        elif clas[3] == 'n':
+        elif name[1] == 'neutral':
             vectorClassifier.append(5)
-        elif clas[3] == 's':
+        elif name[1] == 'sad':
             vectorClassifier.append(6)
         else:
             vectorClassifier.append(0)
-
     matrixVectors = np.asanyarray(matrixVectors)
     vectorClassifier = np.asanyarray(vectorClassifier)
-    return matrixVectors[:, :, 0], vectorClassifier
+    return matrixVectors, vectorClassifier
 
 
 if __name__ == '__main__':
