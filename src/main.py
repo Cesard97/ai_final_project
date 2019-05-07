@@ -1,7 +1,10 @@
 import glob
 from svm_classifier import SvmClassifier
 from k_neighbors import KNeighbors
+import matplotlib.pyplot as plt
 import scipy.io as sc
+import numpy as np
+
 
 class Main:
 
@@ -37,6 +40,7 @@ class Main:
         for file in glob.glob("validation/neutral/*.mat"):
             self.dataFiles.append(file)
             self.true_classes.append(5)
+
         for i in self.dataFiles:
             landmark = sc.loadmat(i)
             v_tem = landmark['faceCoordinatesUnwarped']
@@ -49,12 +53,21 @@ class Main:
         self.svm.model_creation(x)
 
     def test_kn(self):
-        for i in self.dataMatrix:
-            self.kn_prediction[self.dataMatrix[i]] = self.kn_model.predict(i)
+        self.kn_prediction = np.zeros(len(self.true_classes))
+        for i in range(0, len(self.dataMatrix)):
+            aux = self.dataMatrix[i].T
+            if aux.shape == (136, 1):
+                aux = aux.T
+            self.kn_prediction[i] = self.kn_model.predict(aux)
 
     def test_svm(self):
-        for i in self.dataMatrix:
-            self.kn_prediction[self.dataMatrix[i]] = self.svm.compute_emotion(i)
+        self.svm_prediction = np.zeros(len(self.true_classes))
+        for i in range(0, len(self.dataMatrix)):
+            aux = self.dataMatrix[i].T
+            if aux.shape == (136, 1):
+                aux = aux.T
+            self.kn_prediction[i] = self.svm.compute_emotion(aux)
+        print(self.kn_prediction)
 
     def error_percentage(self):
         kn_counter = 0
@@ -66,14 +79,19 @@ class Main:
                 svm_counter = svm_counter + 1
         kn_percentage = kn_counter/len(self.true_classes)
         svm_percentage = svm_counter / len(self.true_classes)
+        # plt.bar([1, 2], kn_percentage, svm_percentage)
+        # plt.show()
+        print(kn_percentage)
+        print(svm_percentage)
 
-    
-
-
-
-
+    def confusion_matrix(self):
+        pass
 
 
 if __name__ == '__main__':
     main = Main()
+    main.data_reading()
     main.instance_creation()
+    main.test_kn()
+    main.test_svm()
+    main.error_percentage()

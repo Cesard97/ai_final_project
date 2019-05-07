@@ -91,12 +91,12 @@ class SvmClassifier:
         neutral = self.svm_neutral_model.predict(charac_vector)
         sad = self.svm_sad_model.predict(charac_vector)
 
-        print("Angry: " + str(angry))
-        print("Disgust: " + str(disgust))
-        print("Fear: " + str(fear))
-        print("Happy: " + str(happy))
-        print("Neutral: " + str(neutral))
-        print("Sad: " + str(sad))
+        # print("Angry: " + str(angry))
+        # print("Disgust: " + str(disgust))
+        # print("Fear: " + str(fear))
+        # print("Happy: " + str(happy))
+        # print("Neutral: " + str(neutral))
+        # print("Sad: " + str(sad))
 
         emotion.append(angry)
         emotion.append(disgust)

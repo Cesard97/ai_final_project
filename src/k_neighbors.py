@@ -72,7 +72,7 @@ class KNeighbors:
         for file in glob.glob("training_data/neutral/*.mat"):
             self.nombresLandMark.append(file)
 
-        for element in nombresLandMark:
+        for element in self.nombresLandMark:
             landmark = sc.loadmat(element)
             vTem = landmark['faceCoordinatesUnwarped']
             S = S + np.outer(vTem, vTem.conjugate())
@@ -99,7 +99,7 @@ class KNeighbors:
         for file in glob.glob("training_data/neutral/*.mat"):
             self.nombresLandMark.append(file)
 
-        for element in nombresLandMark:
+        for element in self.nombresLandMark:
 
             landmark = sc.loadmat(element)
             vTem = landmark['faceCoordinatesUnwarped']
