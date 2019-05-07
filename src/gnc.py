@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!usr/bin/env python
 import numpy as np
 import scipy.io as sc
 import glob
@@ -64,8 +64,8 @@ class gnc:
         for element in self.nombresLandMark:
             landmark = sc.loadmat(element)
             vTem = landmark['faceCoordinatesUnwarped']
-            c = np.sqrt((20 * np.random.rand(67)) ** 2)
-            plt.scatter(-vTem[:, 0], -vTem[:, 1], marker='o',c = c)
+            c = np.sqrt((20 * np.random.rand(68)) ** 2)
+            plt.scatter(vTem, marker='o',c = c)
 
         plt.title('Imagen Land Marks Originales')
         #plt.xticks([]), plt.yticks([])
@@ -80,38 +80,14 @@ class gnc:
         for element in self.nombresLandMark:
             landmark = sc.loadmat(element)
             vTem = landmark['faceCoordinatesUnwarped']
-            vTem = np.vectorize(complex)(vTem[:, 0], vTem[:, 1])
-            S = S + np.outer(vTem, vTem.conjugate())
+            if vTem.shape == (1,136):
+            	vTem = vTem.T
+            S = S + np.outer(vTem, vTem)
         [values, vectors] = np.linalg.eig(S)
         index = np.argmax(values)
         self.mediaP = vectors[:, index]
-        for element in self.nombresLandMark:
-            landmark = sc.loadmat(element)
-            vTem = landmark['faceCoordinatesUnwarped']
-            vTem = np.vectorize(complex)(vTem[:, 0], vTem[:, 1])
-            vTem = vTem * (np.dot(vTem.conjugate().T, self.mediaP) / (np.dot(vTem.conjugate().T, vTem)))
-            c = np.sqrt((20 * np.random.rand(67))**2)
-            plt.scatter(-vTem.imag, -vTem.real, marker='o',c = c)
-
-        plt.plot(-self.mediaP.imag[0:9], -self.mediaP.real[0:9], color = 'red')
-        plt.plot(-self.mediaP.imag[10:18], -self.mediaP.real[10:18], color='red')
-        plt.plot(-self.mediaP.imag[19:26], -self.mediaP.real[19:26], color='red')
-        plt.plot(-self.mediaP.imag[27:34], -self.mediaP.real[27:34], color='red')
-        plt.plot(-self.mediaP.imag[35:38], -self.mediaP.real[35:38], color='red')
-        plt.plot(-self.mediaP.imag[39:49], -self.mediaP.real[39:49], color='red')
-        plt.plot([-self.mediaP.imag[50], -self.mediaP.imag[57]], [-self.mediaP.real[50], -self.mediaP.real[57]], color = 'red')
-        plt.plot(-self.mediaP.imag[50:57], -self.mediaP.real[50:57], color='red')
-        plt.plot(-self.mediaP.imag[58:63], -self.mediaP.real[58:63], color='red')
-        plt.plot(-self.mediaP.imag[64:67], -self.mediaP.real[64:67], color='red')
-        plt.plot([-self.mediaP.imag[64], self.mediaP.imag[65]], [-self.mediaP.real[64], -self.mediaP.real[65]], color='red')
-        plt.plot([-self.mediaP.imag[64], self.mediaP.imag[65]], [self.mediaP.real[64], -self.mediaP.real[65]], color='red')
-
-        plt.title('Alineación de los datos de entrenamiento con la media de Procrustes')
-        #plt.xticks([]), plt.yticks([])
-        plt.grid(True)
-        plt.show()
-
-
+        self.mediaP = self.mediaP.real
+        print('Hayó media')
 
 
     def training(self, alpha):
@@ -127,14 +103,10 @@ class gnc:
 
             landmark = sc.loadmat(element)
             vTem = landmark['faceCoordinatesUnwarped']
-            vTem = np.vectorize(complex)(vTem[:, 0], vTem[:, 1])
-            vTem = vTem * (np.dot(vTem.conjugate().T, self.mediaP) / (np.dot(vTem.conjugate().T, vTem)))
-            real = np.array([vTem.real - self.mediaP.real])
-            imag = np.array([vTem.imag - self.mediaP.imag])
-
-            ### Vector de caracteristicas
-
-            vector = np.concatenate((real.T,imag.T), axis=0)
+            if vTem.shape == (1,136):
+            	vTem = vTem.T
+            vTem = vTem * (np.dot(vTem, self.mediaP.T) / (np.dot(vTem, vTem.T)))
+            vector = np.array([vTem - self.mediaP])
 
             ### Divide by name each landmark
 
@@ -171,7 +143,7 @@ class gnc:
         meanDisgusted = 0
         CxDisgusted = 0
 
-        I = np.eye(134)
+        I = np.eye(136)
 
         ######################## Happy class ##########################
 
@@ -272,59 +244,56 @@ class gnc:
         invDisgusted = np.asmatrix(invDisgusted)
         self.pDisgusted = lambda x: (1 / (np.sqrt(detDisgusted))) * (1 / ((2 * np.pi))) * np.exp(-0.5 * (x - meanDisgusted).T * invDisgusted * (x - meanDisgusted))
 
+    	print('Termino training')
 
-
-    def validation(self, element):
+    def validation(self):
+    	element = 'training_data/happy/happy_vector_0_.mat'
+    	landmark = sc.loadmat(element)
+    	self.vector = landmark['faceCoordinatesUnwarped']
     	emocion = 0
-        landmark = sc.loadmat(element)
-        vTem = landmark['faceCoordinatesUnwarped']
-        vTem = np.vectorize(complex)(vTem[:, 0], vTem[:, 1])
-        vTem = vTem * (np.dot(vTem.conjugate().T, self.mediaP) / (np.dot(vTem.conjugate().T, vTem)))
-        real = np.array([vTem.real - self.mediaP.real])
-        imag = np.array([vTem.imag - self.mediaP.imag])
 
-        ### Vector de caracteristicas
-
-        vector = np.concatenate((real.T, imag.T), axis=0)
+    	if np.sum(self.vector) == 0:
+    		return emocion
+    	else: 
 
         #### Clasificacion de los vectores de caracteristicas
 
-        probaClass = 1/6
+	        probaClass = 1/6
 
 
-        probaHappy = self.pHappy(vector)*probaClass
-        probaSad = self.pSad(vector)*probaClass
-        probaAngry = self.pAngry(vector)*probaClass
-        probaFear = self.pFear(vector)*probaClass
-        probaNeutral = self.pNeutral(vector)*probaClass
-        probaDisgusted = self.pDisgusted(vector)*probaClass
+	        probaHappy = self.pHappy(self.vector)*probaClass
+	        probaSad = self.pSad(self.vector)*probaClass
+	        probaAngry = self.pAngry(self.vector)*probaClass
+	        probaFear = self.pFear(self.vector)*probaClass
+	        probaNeutral = self.pNeutral(self.vector)*probaClass
+	        probaDisgusted = self.pDisgusted(self.vector)*probaClass
 
-        if probaHappy > probaSad and probaHappy > probaAngry and probaHappy > probaFear and probaHappy > probaNeutral and probaHappy > probaDisgusted:
-            print('Clase correspondinte: Happy')
-            print('Probabilidad Happy'+str(probaHappy))
-            emocion = 4
-        elif probaSad > probaHappy and probaSad > probaAngry and probaSad > probaFear and probaSad > probaNeutral and probaSad > probaDisgusted:
-            print('Clase correspondinte: Sad')
-            print('Probabilidad Sad'+str(probaSad))
-            emocion = 6
-        elif probaAngry > probaHappy and probaAngry > probaSad and probaAngry > probaFear and probaAngry > probaNeutral and probaAngry > probaDisgusted:
-            print('Clase correspondinte: Angry')
-            print('Probabilidad Angry'+str(probaAngry))
-            emocion = 1
-        elif probaFear > probaHappy and probaFear > probaSad and probaFear > probaAngry and probaFear > probaNeutral and probaFear > probaDisgusted:
-            print('Clase correspondinte: Fear')
-            print('Probabilidad Fear'+str(probaFear))
-            emocion = 3
-        elif probaNeutral > probaHappy and probaNeutral > probaSad and probaNeutral > probaAngry and probaNeutral > probaFear and probaNeutral > probaDisgusted:
-            print('Clase correspondinte: Neutral')
-            print('Probabilidad Neutral'+str(probaNeutral))
-            emocion = 5
-        elif probaDisgusted > probaHappy and probaDisgusted > probaSad and probaDisgusted > probaAngry and probaDisgusted > probaFear and probaDisgusted > probaNeutral:
-            print('Clase correspondinte: Disgust')
-            print('Probabilidad disgust'+str(probaDisgusted))
-            emocion = 2
+	        if probaHappy > probaSad and probaHappy > probaAngry and probaHappy > probaFear and probaHappy > probaNeutral and probaHappy > probaDisgusted:
+	            print('Clase correspondinte: Happy')
+	            print('Probabilidad Happy'+str(probaHappy))
+	            emocion = 4
+	        elif probaSad > probaHappy and probaSad > probaAngry and probaSad > probaFear and probaSad > probaNeutral and probaSad > probaDisgusted:
+	            print('Clase correspondinte: Sad')
+	            print('Probabilidad Sad'+str(probaSad))
+	            emocion = 6
+	        elif probaAngry > probaHappy and probaAngry > probaSad and probaAngry > probaFear and probaAngry > probaNeutral and probaAngry > probaDisgusted:
+	            print('Clase correspondinte: Angry')
+	            print('Probabilidad Angry'+str(probaAngry))
+	            emocion = 1
+	        elif probaFear > probaHappy and probaFear > probaSad and probaFear > probaAngry and probaFear > probaNeutral and probaFear > probaDisgusted:
+	            print('Clase correspondinte: Fear')
+	            print('Probabilidad Fear'+str(probaFear))
+	            emocion = 3
+	        elif probaNeutral > probaHappy and probaNeutral > probaSad and probaNeutral > probaAngry and probaNeutral > probaFear and probaNeutral > probaDisgusted:
+	            print('Clase correspondinte: Neutral')
+	            print('Probabilidad Neutral'+str(probaNeutral))
+	            emocion = 5
+	        elif probaDisgusted > probaHappy and probaDisgusted > probaSad and probaDisgusted > probaAngry and probaDisgusted > probaFear and probaDisgusted > probaNeutral:
+	            print('Clase correspondinte: Disgust')
+	            print('Probabilidad disgust'+str(probaDisgusted))
+	            emocion = 2
 
-        return emocion
+	        return emocion
 
 
     def main(self):
@@ -332,11 +301,13 @@ class gnc:
     	rospy.Subscriber('features', Float32MultiArray, self.faturesCallBack)
     	pubEmocion = rospy.Publisher('gnc_emotion', Int16, queue_size = 1)
     	rate = rospy.Rate(10)
-    	self.hallarMediaProcrustes(self)
-    	self.training(self,1)
+    	self.hallarMediaProcrustes()
+    	self.training(1)
     	while not rospy.is_shutdown():
-    		#self.graficarLandMarks
-    		emocion = self.validation(self.vector)
+    		self.graficarLandMarks
+    		print('Va a comenzar a validar')
+    		emocion = self.validation()
+    		print('La emocion es'+str(emocion))
     		pubEmocion.publish(emocion)
     		rate.sleep()
 
@@ -344,5 +315,5 @@ class gnc:
 
 if __name__ == '__main__':
     clasificador = gnc()
-    gnc.main()
+    clasificador.main()
     

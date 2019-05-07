@@ -1,4 +1,3 @@
-import numpy as np
 import glob
 from svm_classifier import SvmClassifier
 from k_neighbors import KNeighbors
@@ -10,12 +9,6 @@ class Main:
         self.dataFiles = []
         self.kn = None
         self.kn_model = None
-        self.svm_angry_model = None
-        self.svm_disgust_model = None
-        self.svm_fear_model = None
-        self.svm_happy_model = None
-        self.svm_neutral_model = None
-        self.svm_sad_model = None
 
         self.true_classes = []
         self.dataMatrix = []
@@ -53,55 +46,30 @@ class Main:
         x, y = self.kn.training_data_prep()
         self.kn_model = self.kn.model_creation(x, y)
         x, y = self.svm.training_data_prep()
-        self.svm_angry_model = self.svm.svm_model(x, self.svm.y_angry)
-        self.svm_disgust_model = self.svm.svm_model(x, self.svm.y_disgust)
-        self.svm_fear_model = self.svm.svm_model(x, self.svm.y_fear)
-        self.svm_happy_model = self.svm.svm_model(x, self.svm.y_happy)
-        self.svm_neutral_model = self.svm.svm_model(x, self.svm.y_neutral)
-        self.svm_sad_model = self.svm.svm_model(x, self.svm.y_sad)
+        self.svm.model_creation(x)
 
     def test_kn(self):
         for i in self.dataMatrix:
             self.kn_prediction[self.dataMatrix[i]] = self.kn_model.predict(i)
+
     def test_svm(self):
-        angry = self.svm_angry_model.predict(self.charac_vector)
-        disgust = self.svm_disgust_model.predict(self.charac_vector)
-        fear = self.svm_fear_model.predict(self.charac_vector)
-        happy = self.svm_happy_model.predict(self.charac_vector)
-        neutral = self.svm_neutral_model.predict(self.charac_vector)
-        sad = self.svm_sad_model.predict(self.charac_vector)
+        for i in self.dataMatrix:
+            self.kn_prediction[self.dataMatrix[i]] = self.svm.compute_emotion(i)
 
-        print("Angry: " + str(angry))
-        print("Disgust: " + str(disgust))
-        print("Fear: " + str(fear))
-        print("Happy: " + str(happy))
-        print("Neutral: " + str(neutral))
-        print("Sad: " + str(sad))
+    def error_percentage(self):
+        kn_counter = 0
+        svm_counter = 0
+        for i in range(0, len(self.true_classes)):
+            if self.true_classes[i] == self.kn_prediction[i]:
+                kn_counter = kn_counter + 1
+            if self.true_classes[i] == self.svm_prediction[i]:
+                svm_counter = svm_counter + 1
+        kn_percentage = kn_counter/len(self.true_classes)
+        svm_percentage = svm_counter / len(self.true_classes)
 
-        emotion.append(angry)
-        emotion.append(disgust)
-        emotion.append(fear)
-        emotion.append(happy)
-        emotion.append(neutral)
-        emotion.append(sad)
+    
 
-        distance.append(self.plane_distance(self.svm_angry_model.coef_, self.charac_vector))
-        distance.append(self.plane_distance(self.svm_disgust_model.coef_, self.charac_vector))
-        distance.append(self.plane_distance(self.svm_fear_model.coef_, self.charac_vector))
-        distance.append(self.plane_distance(self.svm_happy_model.coef_, self.charac_vector))
-        distance.append(self.plane_distance(self.svm_neutral_model.coef_, self.charac_vector))
-        distance.append(self.plane_distance(self.svm_sad_model.coef_, self.charac_vector))
 
-        count = emotion.count(1)
-        if count > 1:
-            indexes = []
-            posibleEmotionDistance = np.zeros((7, 1))
-            for i in range(0, len(emotion)):
-                if emotion[i] == 1:
-                    indexes.append(i)
-                    posibleEmotionDistance[i] = distance[i]
-
-            answer = np.argmax(posibleEmotionDistance)
 
 
 

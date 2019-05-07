@@ -38,57 +38,13 @@ class SvmClassifier:
         pub = rospy.Publisher('SVM_response', Int16, queue_size=10)
         rate = rospy.Rate(10)
         x, y = self.training_data_prep()
-        self.svm_angry_model = self.svm_model(x, self.y_angry)
-        self.svm_disgust_model = self.svm_model(x, self.y_disgust)
-        self.svm_fear_model = self.svm_model(x, self.y_fear)
-        self.svm_happy_model = self.svm_model(x, self.y_happy)
-        self.svm_neutral_model = self.svm_model(x, self.y_neutral)
-        self.svm_sad_model = self.svm_model(x, self.y_sad)
+        self.model_creation(x)
         while not rospy.is_shutdown():
             answer = 0
             if not (np.sum(self.charac_vector) == 0):
-                emotion = [0]
-                distance = [0]
-                angry = self.svm_angry_model.predict(self.charac_vector)
-                disgust = self.svm_disgust_model.predict(self.charac_vector)
-                fear = self.svm_fear_model.predict(self.charac_vector)
-                happy = self.svm_happy_model.predict(self.charac_vector)
-                neutral = self.svm_neutral_model.predict(self.charac_vector)
-                sad = self.svm_sad_model.predict(self.charac_vector)
-
-                print("Angry: " + str(angry))
-                print("Disgust: " + str(disgust))
-                print("Fear: " + str(fear))
-                print("Happy: " + str(happy))
-                print("Neutral: " + str(neutral))
-                print("Sad: " + str(sad))
-
-                emotion.append(angry)
-                emotion.append(disgust)
-                emotion.append(fear)
-                emotion.append(happy)
-                emotion.append(neutral)
-                emotion.append(sad)
-
-                distance.append(self.plane_distance(self.svm_angry_model.coef_, self.charac_vector))
-                distance.append(self.plane_distance(self.svm_disgust_model.coef_, self.charac_vector))
-                distance.append(self.plane_distance(self.svm_fear_model.coef_, self.charac_vector))
-                distance.append(self.plane_distance(self.svm_happy_model.coef_, self.charac_vector))
-                distance.append(self.plane_distance(self.svm_neutral_model.coef_, self.charac_vector))
-                distance.append(self.plane_distance(self.svm_sad_model.coef_, self.charac_vector))
-
-                count = emotion.count(1)
-                if count > 1:
-                    indexes = []
-                    posibleEmotionDistance = np.zeros((7, 1))
-                    for i in range(0, len(emotion)):
-                        if emotion[i] == 1:
-                            indexes.append(i)
-                            posibleEmotionDistance[i] = distance[i]
-
-                    answer = np.argmax(posibleEmotionDistance)
-                print(answer)
-                pub.publish(answer)
+                answer = self.compute_emotion(self.charac_vector)
+            print(answer)
+            pub.publish(answer)
             rate.sleep()
 
     def mean(self):
@@ -115,6 +71,58 @@ class SvmClassifier:
         index = np.argmax(values)
         mediaP = vectors[:, index]
         self.mediaP = mediaP.real
+
+    def model_creation(self, x):
+        self.svm_angry_model = self.svm_model(x, self.y_angry)
+        self.svm_disgust_model = self.svm_model(x, self.y_disgust)
+        self.svm_fear_model = self.svm_model(x, self.y_fear)
+        self.svm_happy_model = self.svm_model(x, self.y_happy)
+        self.svm_neutral_model = self.svm_model(x, self.y_neutral)
+        self.svm_sad_model = self.svm_model(x, self.y_sad)
+
+    def compute_emotion(self, charac_vector):
+        answer = 0
+        emotion = [0]
+        distance = [0]
+        angry = self.svm_angry_model.predict(charac_vector)
+        disgust = self.svm_disgust_model.predict(charac_vector)
+        fear = self.svm_fear_model.predict(charac_vector)
+        happy = self.svm_happy_model.predict(charac_vector)
+        neutral = self.svm_neutral_model.predict(charac_vector)
+        sad = self.svm_sad_model.predict(charac_vector)
+
+        print("Angry: " + str(angry))
+        print("Disgust: " + str(disgust))
+        print("Fear: " + str(fear))
+        print("Happy: " + str(happy))
+        print("Neutral: " + str(neutral))
+        print("Sad: " + str(sad))
+
+        emotion.append(angry)
+        emotion.append(disgust)
+        emotion.append(fear)
+        emotion.append(happy)
+        emotion.append(neutral)
+        emotion.append(sad)
+
+        distance.append(self.plane_distance(self.svm_angry_model.coef_, charac_vector))
+        distance.append(self.plane_distance(self.svm_disgust_model.coef_, charac_vector))
+        distance.append(self.plane_distance(self.svm_fear_model.coef_, charac_vector))
+        distance.append(self.plane_distance(self.svm_happy_model.coef_, charac_vector))
+        distance.append(self.plane_distance(self.svm_neutral_model.coef_, charac_vector))
+        distance.append(self.plane_distance(self.svm_sad_model.coef_, charac_vector))
+
+        count = emotion.count(1)
+        if count > 1:
+            indexes = []
+            posibleEmotionDistance = np.zeros((7, 1))
+            for i in range(0, len(emotion)):
+                if emotion[i] == 1:
+                    indexes.append(i)
+                    posibleEmotionDistance[i] = distance[i]
+
+            answer = np.argmax(posibleEmotionDistance)
+        return answer
 
     def training_data_prep(self):
         self.mean()
