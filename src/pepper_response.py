@@ -10,8 +10,8 @@ gnc = 0
 nn = 0
 kn = 0
 svm = 0
-w_gnc = 0
-w_nn = 0
+w_gnc = 2
+w_nn = 2
 w_svm = 1
 w_kn = 2
 say_angry = ["Oh! Veo que estas bravo... Comete una snickers",
@@ -73,28 +73,36 @@ def compute_votes():
     sad = response.count(6)
     votes = [angry, disgust, fear, happy, neutral, sad]
     emotion = np.argmax(votes) + 1
+
+    print("Angry: " + str(angry))
+    print("Disgust: " + str(disgust))
+    print("Fear: " + str(fear))
+    print("Happy: " + str(happy))
+    print("Neutral: " + str(neutral))
+    print("Sad: " + str(sad))
+
     print(response)
     return emotion
 
 
 def pepper_node():
-    rospy.init_node('pepper_response', anonymous=False)
+    rospy.init_node('pepper_response', anonymous=True)
     rospy.Subscriber('gnc_response', Int16, gnc_callback)
     rospy.Subscriber('NN_response', Int16, nn_callback)
     rospy.Subscriber('KN_response', Int16, kn_callback)
     rospy.Subscriber('SVM_response', Int16, svm_callback)
     pub = rospy.Publisher('speech', String, queue_size=10)
-    rate = rospy.Rate(10)
-
+    rate = rospy.Rate(1)
     key = Keyreader()
     key.start()
     while not rospy.is_shutdown():
+        pepper_say = ""
         intended = key.getNumber()
         if intended == 0:
             emotion = compute_votes()
             pepper_say = pepper_response(emotion)
-            pub.publish(pepper_say)
-            print(pepper_say)
+        pub.publish(pepper_say)
+        print(pepper_say)
         rate.sleep()
 
 
