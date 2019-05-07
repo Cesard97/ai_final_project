@@ -2,56 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="393ea97f-25a4-4242-a1f2-e5ee6702a899" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/k_neighbors.py" beforeDir="false" afterPath="$PROJECT_DIR$/k_neighbors.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/svm_classifier.py" beforeDir="false" afterPath="$PROJECT_DIR$/svm_classifier.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/angry/a_vector_149_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/angry/a_vector_151_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/angry/a_vector_15_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/angry/a_vector_22_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/angry/a_vector_74_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/angry/a_vector_85_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/angry/angry_vector_0_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/angry/angry_vector_1_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/disgust/d_vector_113_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/disgust/d_vector_122_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/disgust/d_vector_17_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/disgust/d_vector_27_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/disgust/d_vector_81_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/disgust/d_vector_82_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/disgust/disgust_vector_0_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/disgust/disgust_vector_1_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/fear/f_vector_124_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/fear/f_vector_125_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/fear/f_vector_173_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/fear/f_vector_196_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/fear/f_vector_34_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/fear/f_vector_37_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/fear/fear_vector_0_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/fear/fear_vector_1_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/happy/h_vector_114_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/happy/h_vector_119_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/happy/h_vector_11_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/happy/h_vector_19_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/happy/h_vector_58_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/happy/h_vector_60_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/happy/happy_vector_0_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/happy/happy_vector_1_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/neutral/n_vector_137_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/neutral/n_vector_148_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/neutral/n_vector_18_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/neutral/n_vector_28_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/neutral/n_vector_76_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/neutral/n_vector_83_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/neutral/neutral_vector_0_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/neutral/neutral_vector_1_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/sad/s_vector_130_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/sad/s_vector_132_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/sad/s_vector_13_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/sad/s_vector_55_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/sad/s_vector_61_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/sad/s_vector_9_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/sad/sad_vector_0_.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_data/sad/sad_vector_1_.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -64,8 +15,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/svm_classifier.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="45" column="58" lean-forward="true" selection-start-line="39" selection-start-column="8" selection-end-line="45" selection-end-column="58" />
+            <state relative-caret-position="600">
+              <caret line="73" column="31" lean-forward="true" selection-start-line="73" selection-start-column="31" selection-end-line="73" selection-end-column="31" />
               <folding>
                 <element signature="e#23#35#0" expanded="true" />
               </folding>
@@ -88,17 +39,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/svm_classifier_nonlinear.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="875">
-              <caret line="160" column="16" selection-start-line="160" selection-start-column="16" selection-end-line="160" selection-end-column="16" />
+            <state relative-caret-position="-10">
+              <caret line="101" column="36" lean-forward="true" selection-start-line="101" selection-start-column="36" selection-end-line="101" selection-end-column="36" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="710">
-              <caret line="55" column="16" selection-start-line="55" selection-start-column="16" selection-end-line="55" selection-end-column="16" />
+            <state relative-caret-position="395">
+              <caret line="71" column="35" selection-start-line="71" selection-start-column="35" selection-end-line="71" selection-end-column="35" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -106,10 +57,10 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/k_neighbors.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-120">
+            <state relative-caret-position="780">
               <caret line="52" lean-forward="true" selection-start-line="52" selection-end-line="52" />
               <folding>
                 <element signature="e#23#35#0" expanded="true" />
@@ -242,13 +193,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/svm_classifier_nonlinear.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="875">
-          <caret line="160" column="16" selection-start-line="160" selection-start-column="16" selection-end-line="160" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/tarea7.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-3145" />
@@ -264,10 +208,27 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/k_neighbors.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="780">
+          <caret line="52" lean-forward="true" selection-start-line="52" selection-end-line="52" />
+          <folding>
+            <element signature="e#23#35#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/svm_classifier_nonlinear.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-10">
+          <caret line="101" column="36" lean-forward="true" selection-start-line="101" selection-start-column="36" selection-end-line="101" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/svm_classifier.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="45" column="58" lean-forward="true" selection-start-line="39" selection-start-column="8" selection-end-line="45" selection-end-column="58" />
+        <state relative-caret-position="600">
+          <caret line="73" column="31" lean-forward="true" selection-start-line="73" selection-start-column="31" selection-end-line="73" selection-end-column="31" />
           <folding>
             <element signature="e#23#35#0" expanded="true" />
           </folding>
@@ -276,20 +237,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="710">
-          <caret line="55" column="16" selection-start-line="55" selection-start-column="16" selection-end-line="55" selection-end-column="16" />
+        <state relative-caret-position="395">
+          <caret line="71" column="35" selection-start-line="71" selection-start-column="35" selection-end-line="71" selection-end-column="35" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/k_neighbors.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-120">
-          <caret line="52" lean-forward="true" selection-start-line="52" selection-end-line="52" />
-          <folding>
-            <element signature="e#23#35#0" expanded="true" />
           </folding>
         </state>
       </provider>
