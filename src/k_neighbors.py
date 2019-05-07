@@ -7,147 +7,134 @@ import glob
 import numpy as np
 import scipy.io as sc
 
-global nombresLandMark
-charac_vector = []
-nombresLandMark = []
-mediaP = []
-vectorClassifier = []
-matrixVectors = []
-clf = 0
-svm_angry_model = None
-svm_disgust_model = None
-svm_fear_model = None
-svm_happy_model = None
-svm_neutral_model = None
-svm_sad_model = None
 
+class KNeighbors:
 
-def features_callback(data):
-    global charac_vector
-    charac_vector = data.data
+    def __init__(self):
+        self.charac_vector = []
+        self.nombresLandMark = []
+        self.mediaP = None
+        self.vectorClassifier = []
+        self.matrixVectors = []
 
+    def features_callback(self, data):
+        self.charac_vector = data.data
 
-def k_neighbors():
-    rospy.init_node('k_neighbors', anonymous=False)
-    rospy.Subscriber('features', Float32MultiArray, features_callback)
-    pub = rospy.Publisher('KN_response', Int16, queue_size=1)
-    rate = rospy.Rate(1)
-    x, y = training_data_prep()
-    neigh = KNeighborsClassifier(n_neighbors=150)
-    neigh.fit(x, np.transpose(y))
-    while not rospy.is_shutdown():
-        if np.sum(charac_vector) == 0:
-            emotion = 0
-        else:
-            emotion = neigh.predict(charac_vector)
+    def k_neighbors(self):
+        rospy.init_node('k_neighbors', anonymous=False)
+        rospy.Subscriber('features', Float32MultiArray, self.features_callback)
+        pub = rospy.Publisher('KN_response', Int16, queue_size=1)
+        rate = rospy.Rate(1)
+        x, y = self.training_data_prep()
+        neigh = self.model_creation(x, y)
+        while not rospy.is_shutdown():
+            if np.sum(self.charac_vector) == 0:
+                emotion = 0
+            else:
+                emotion = neigh.predict(self.charac_vector)
+            string = ""
+            if emotion == 1:
+                string = "angry"
+            elif emotion == 2:
+                string = "disgust"
+            elif emotion == 3:
+                string = "fear"
+            elif emotion == 4:
+                string = "happy"
+            elif emotion == 5:
+                string = "neutral"
+            elif emotion == 6:
+                string = "sad"
+            elif emotion == 0:
+                string= "nada prros"
+            print(string)
+            pub.publish(emotion)
+            rate.sleep()
 
-        string = ""
-        if emotion == 1:
-            string = "angry"
-        elif emotion == 2:
-            string = "disgust"
-        elif emotion == 3:
-            string = "fear"
-        elif emotion == 4:
-            string = "happy"
-        elif emotion == 5:
-            string = "neutral"
-        elif emotion == 6:
-            string = "sad"
-        elif emotion == 0:
-            string= "nada prros"
-        print(string)
-        pub.publish(emotion)
-        rate.sleep()
+    def model_creation(self, x, y):
+        neigh = KNeighborsClassifier(n_neighbors=150)
+        neigh.fit(x, np.transpose(y))
+        return neigh
 
+    def mean(self):
+        global S, mediaP, nombresLandMark
+        S = 0
+        for file in glob.glob("training_data/happy/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/angry/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/sad/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/fear/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/disgust/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/neutral/*.mat"):
+            self.nombresLandMark.append(file)
 
-def mean():
-    global S, mediaP, nombresLandMark
-    S = 0
-    for file in glob.glob("training_data/happy/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/angry/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/sad/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/fear/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/disgust/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/neutral/*.mat"):
-        nombresLandMark.append(file)
+        for element in nombresLandMark:
+            landmark = sc.loadmat(element)
+            vTem = landmark['faceCoordinatesUnwarped']
+            S = S + np.outer(vTem, vTem.conjugate())
 
-    for element in nombresLandMark:
-        landmark = sc.loadmat(element)
-        vTem = landmark['faceCoordinatesUnwarped']
-        S = S + np.outer(vTem, vTem.conjugate())
+        [values, vectors] = np.linalg.eig(S)
+        index = np.argmax(values)
+        mediaP = vectors[:, index]
+        self.mediaP = mediaP.real
 
-    [values, vectors] = np.linalg.eig(S)
-    index = np.argmax(values)
-    mediaP = vectors[:, index]
-    mediaP = mediaP.real
+    def training_data_prep(self):
+        self.mean()
+        self.nombresLandMark = []
 
+        for file in glob.glob("training_data/happy/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/angry/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/sad/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/fear/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/disgust/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/neutral/*.mat"):
+            self.nombresLandMark.append(file)
 
-def training_data_prep():
-    global nombresLandMark, matrixVectors, vectorClassifier, mediaP
-    mean()
-    nombresLandMark = []
+        for element in nombresLandMark:
 
-    for file in glob.glob("training_data/happy/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/angry/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/sad/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/fear/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/disgust/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/neutral/*.mat"):
-        nombresLandMark.append(file)
+            landmark = sc.loadmat(element)
+            vTem = landmark['faceCoordinatesUnwarped']
+            if vTem.shape == (136, 1):
+                vTem = vTem.T
+            aux = (np.dot(vTem[0], mediaP.T) / (np.dot(vTem, vTem.T)))
+            vTem = vTem * aux
+            vector = vTem[0] - mediaP
+            self.matrixVectors.append(vector)
 
-    for element in nombresLandMark:
+            name = element.split("/")
 
-        landmark = sc.loadmat(element)
-        vTem = landmark['faceCoordinatesUnwarped']
-        if vTem.shape == (136, 1):
-            vTem = vTem.T
-        aux = (np.dot(vTem[0], mediaP.T) / (np.dot(vTem, vTem.T)))
-        vTem = vTem * aux
-        vector = vTem[0] - mediaP
-        #print(vector)
-        matrixVectors.append(vector)
+            if name[1] == 'angry':
+                self.vectorClassifier.append(1)
+            elif name[1] == 'disgust':
+                self.vectorClassifier.append(2)
+            elif name[1] == 'fear':
+                self.vectorClassifier.append(3)
+            elif name[1] == 'happy':
+                self.vectorClassifier.append(4)
+            elif name[1] == 'neutral':
+                self.vectorClassifier.append(5)
+            elif name[1] == 'sad':
+                self.vectorClassifier.append(6)
+            else:
+                self.vectorClassifier.append(0)
 
-        name = element.split("/")
-
-        if name[1] == 'angry':
-            vectorClassifier.append(1)
-            #print(1)
-        elif name[1] == 'disgust':
-            vectorClassifier.append(2)
-            #print(2)
-        elif name[1] == 'fear':
-            vectorClassifier.append(3)
-            #print(3)
-        elif name[1] == 'happy':
-            vectorClassifier.append(4)
-            #print(4)
-        elif name[1] == 'neutral':
-            vectorClassifier.append(5)
-            #print(5)
-        elif name[1] == 'sad':
-            vectorClassifier.append(6)
-            #print(6)
-        else:
-            vectorClassifier.append(0)
-
-    matrixVectors = np.asanyarray(matrixVectors)
-    vectorClassifier = np.asanyarray(vectorClassifier)
-    return matrixVectors, vectorClassifier
+        self.matrixVectors = np.asanyarray(self.matrixVectors)
+        self.vectorClassifier = np.asanyarray(self.vectorClassifier)
+        return self.matrixVectors, self.vectorClassifier
 
 
 if __name__ == '__main__':
     try:
-        k_neighbors()
+        classifier = KNeighbors()
+        classifier.k_neighbors()
     except rospy.ROSInterruptException:
         pass

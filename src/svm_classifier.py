@@ -8,228 +8,221 @@ import scipy.io as sc
 from sklearn import svm
 
 
-charac_vector = []
-nombresLandMark = []
-mediaP = []
-vectorClassifier = []
-matrixVectors = []
-y_angry = [0]
-y_disgust = [0]
-y_fear = [0]
-y_happy = [0]
-y_neutral = [0]
-y_sad = [0]
+class SvmClassifier:
 
+    def __init__(self):
+        self.charac_vector = []
+        self.nombresLandMark = []
+        self.mediaP = None
+        self.vectorClassifier = []
+        self.matrixVectors = []
+        self.y_angry = [0]
+        self.y_disgust = [0]
+        self.y_fear = [0]
+        self.y_happy = [0]
+        self.y_neutral = [0]
+        self.y_sad = [0]
+        self.svm_angry_model = None
+        self.svm_disgust_model = None
+        self.svm_fear_model = None
+        self.svm_happy_model = None
+        self.svm_neutral_model = None
+        self.svm_sad_model = None
 
-def features_callback(data):
-    global charac_vector
-    charac_vector = data.data
+    def features_callback(self, data):
+        self.charac_vector = data.data
 
+    def svm_classifier(self):
+        rospy.init_node('svm_classifier', anonymous=False)
+        rospy.Subscriber('features', Float32MultiArray, self.features_callback)
+        pub = rospy.Publisher('SVM_response', Int16, queue_size=10)
+        rate = rospy.Rate(10)
+        x, y = self.training_data_prep()
+        self.svm_angry_model = self.svm_model(x, self.y_angry)
+        self.svm_disgust_model = self.svm_model(x, self.y_disgust)
+        self.svm_fear_model = self.svm_model(x, self.y_fear)
+        self.svm_happy_model = self.svm_model(x, self.y_happy)
+        self.svm_neutral_model = self.svm_model(x, self.y_neutral)
+        self.svm_sad_model = self.svm_model(x, self.y_sad)
+        while not rospy.is_shutdown():
+            answer = 0
+            if not (np.sum(self.charac_vector) == 0):
+                emotion = [0]
+                distance = [0]
+                angry = self.svm_angry_model.predict(self.charac_vector)
+                disgust = self.svm_disgust_model.predict(self.charac_vector)
+                fear = self.svm_fear_model.predict(self.charac_vector)
+                happy = self.svm_happy_model.predict(self.charac_vector)
+                neutral = self.svm_neutral_model.predict(self.charac_vector)
+                sad = self.svm_sad_model.predict(self.charac_vector)
 
-def svm_classifier():
-    rospy.init_node('svm_classifier', anonymous=False)
-    rospy.Subscriber('features', Float32MultiArray, features_callback)
-    pub = rospy.Publisher('SVM_response', Int16, queue_size=10)
-    rate = rospy.Rate(10)
-    x, y = training_data_prep()
-    svm_angry_model = svm_model(x, y_angry)
-    svm_disgust_model = svm_model(x, y_disgust)
-    svm_fear_model = svm_model(x, y_fear)
-    svm_happy_model = svm_model(x, y_happy)
-    svm_neutral_model = svm_model(x, y_neutral)
-    svm_sad_model = svm_model(x, y_sad)
-    while not rospy.is_shutdown():
-        answer = 0
-        if not (charac_vector == []):
-            emotion = [0]
-            distance = [0]
-            angry = svm_angry_model.predict(charac_vector)
-            disgust = svm_disgust_model.predict(charac_vector)
-            fear = svm_fear_model.predict(charac_vector)
-            happy = svm_happy_model.predict(charac_vector)
-            neutral = svm_neutral_model.predict(charac_vector)
-            sad = svm_sad_model.predict(charac_vector)
+                print("Angry: " + str(angry))
+                print("Disgust: " + str(disgust))
+                print("Fear: " + str(fear))
+                print("Happy: " + str(happy))
+                print("Neutral: " + str(neutral))
+                print("Sad: " + str(sad))
 
-            print("Angry: " + str(angry))
-            print("Disgust: " + str(disgust))
-            print("Fear: " + str(fear))
-            print("Happy: " + str(happy))
-            print("Neutral: " + str(neutral))
-            print("Sad: " + str(sad))
+                emotion.append(angry)
+                emotion.append(disgust)
+                emotion.append(fear)
+                emotion.append(happy)
+                emotion.append(neutral)
+                emotion.append(sad)
 
-            emotion.append(angry)
-            emotion.append(disgust)
-            emotion.append(fear)
-            emotion.append(happy)
-            emotion.append(neutral)
-            emotion.append(sad)
+                distance.append(self.plane_distance(self.svm_angry_model.coef_, self.charac_vector))
+                distance.append(self.plane_distance(self.svm_disgust_model.coef_, self.charac_vector))
+                distance.append(self.plane_distance(self.svm_fear_model.coef_, self.charac_vector))
+                distance.append(self.plane_distance(self.svm_happy_model.coef_, self.charac_vector))
+                distance.append(self.plane_distance(self.svm_neutral_model.coef_, self.charac_vector))
+                distance.append(self.plane_distance(self.svm_sad_model.coef_, self.charac_vector))
 
-            distance.append(plane_distance(svm_angry_model.coef_, charac_vector))
-            distance.append(plane_distance(svm_disgust_model.coef_, charac_vector))
-            distance.append(plane_distance(svm_fear_model.coef_, charac_vector))
-            distance.append(plane_distance(svm_happy_model.coef_, charac_vector))
-            distance.append(plane_distance(svm_neutral_model.coef_, charac_vector))
-            distance.append(plane_distance(svm_sad_model.coef_, charac_vector))
+                count = emotion.count(1)
+                if count > 1:
+                    indexes = []
+                    posibleEmotionDistance = np.zeros((7, 1))
+                    for i in range(0, len(emotion)):
+                        if emotion[i] == 1:
+                            indexes.append(i)
+                            posibleEmotionDistance[i] = distance[i]
 
-            count = emotion.count(1)
-            if count > 1:
-                indexes = []
-                posibleEmotionDistance = np.zeros((7, 1))
-                for i in range(0, len(emotion)):
-                    if emotion[i] == 1:
-                        indexes.append(i)
-                        posibleEmotionDistance[i] = distance[i]
+                    answer = np.argmax(posibleEmotionDistance)
+                print(answer)
+                pub.publish(answer)
+            rate.sleep()
 
-                answer = np.argmax(posibleEmotionDistance)
-            print(answer)
-            pub.publish(answer)
-        rate.sleep()
+    def mean(self):
+        S = 0
+        for file in glob.glob("training_data/happy/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/angry/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/sad/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/fear/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/disgust/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/neutral/*.mat"):
+            self.nombresLandMark.append(file)
 
+        for element in self.nombresLandMark:
+            landmark = sc.loadmat(element)
+            vTem = landmark['faceCoordinatesUnwarped']
+            S = S + np.outer(vTem, vTem.conjugate())
 
-def mean():
-    global S, mediaP, nombresLandMark
-    S = 0
-    for file in glob.glob("training_data/happy/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/angry/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/sad/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/fear/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/disgust/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/neutral/*.mat"):
-        nombresLandMark.append(file)
+        [values, vectors] = np.linalg.eig(S)
+        index = np.argmax(values)
+        mediaP = vectors[:, index]
+        self.mediaP = mediaP.real
 
-    for element in nombresLandMark:
-        landmark = sc.loadmat(element)
-        vTem = landmark['faceCoordinatesUnwarped']
-        S = S + np.outer(vTem, vTem.conjugate())
+    def training_data_prep(self):
+        self.mean()
+        self.nombresLandMark = []
 
-    [values, vectors] = np.linalg.eig(S)
-    index = np.argmax(values)
-    mediaP = vectors[:, index]
-    mediaP = mediaP.real
+        for file in glob.glob("training_data/happy/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/angry/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/sad/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/fear/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/disgust/*.mat"):
+            self.nombresLandMark.append(file)
+        for file in glob.glob("training_data/neutral/*.mat"):
+            self.nombresLandMark.append(file)
 
+        for element in self.nombresLandMark:
+            mediaP = self.mediaP
+            landmark = sc.loadmat(element)
+            vTem = landmark['faceCoordinatesUnwarped']
+            if vTem.shape == (136, 1):
+                vTem = vTem.T
+            aux1 = np.dot(vTem, mediaP.T)
+            aux2 = (np.dot(vTem, vTem.T))
+            aux = aux1 / aux2
+            vTem = vTem * aux
+            vector = vTem[0] - self.mediaP
+            self.matrixVectors.append(vector)
 
-def training_data_prep():
-    global nombresLandMark, matrixVectors, vectorClassifier, mediaP, y_angry, y_disgust, y_fear, y_happy, y_sad, y_neutral
-    mean()
-    nombresLandMark = []
+            name = element.split("/")
 
-    for file in glob.glob("training_data/happy/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/angry/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/sad/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/fear/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/disgust/*.mat"):
-        nombresLandMark.append(file)
-    for file in glob.glob("training_data/neutral/*.mat"):
-        nombresLandMark.append(file)
+            if name[1] == 'angry':
+                self.vectorClassifier.append(1)
+            elif name[1] == 'disgust':
+                self.vectorClassifier.append(2)
+            elif name[1] == 'fear':
+                self.vectorClassifier.append(3)
+            elif name[1] == 'happy':
+                self.vectorClassifier.append(4)
+            elif name[1] == 'neutral':
+                self.vectorClassifier.append(5)
+            elif name[1] == 'sad':
+                self.vectorClassifier.append(6)
+            else:
+                self.vectorClassifier.append(0)
 
-    for element in nombresLandMark:
+        self.matrixVectors = np.asanyarray(self.matrixVectors)
+        self.vectorClassifier = np.asanyarray(self.vectorClassifier)
 
-        landmark = sc.loadmat(element)
-        vTem = landmark['faceCoordinatesUnwarped']
-        if vTem.shape == (136, 1):
-            vTem = vTem.T
-        aux1 = np.dot(vTem, mediaP.T)
-        aux2 = (np.dot(vTem, vTem.T))
-        aux = aux1 / aux2
-        vTem = vTem * aux
-        vector = vTem[0] - mediaP
-        #print(vector)
-        matrixVectors.append(vector)
+        self.y_angry = np.zeros(self.vectorClassifier.shape)
+        self.y_disgust = np.zeros(self.vectorClassifier.shape)
+        self.y_fear = np.zeros(self.vectorClassifier.shape)
+        self.y_happy = np.zeros(self.vectorClassifier.shape)
+        self.y_neutral = np.zeros(self.vectorClassifier.shape)
+        self.y_sad = np.zeros(self.vectorClassifier.shape)
 
-        name = element.split("/")
+        for i in range(0, len(self.vectorClassifier)):
+            if not(self.vectorClassifier[i] == 1):
+                self.y_angry[i] = 0
+            else:
+                self.y_angry[i] = 1
 
-        if name[1] == 'angry':
-            vectorClassifier.append(1)
-            #print(1)
-        elif name[1] == 'disgust':
-            vectorClassifier.append(2)
-            #print(2)
-        elif name[1] == 'fear':
-            vectorClassifier.append(3)
-            #print(3)
-        elif name[1] == 'happy':
-            vectorClassifier.append(4)
-            #print(4)
-        elif name[1] == 'neutral':
-            vectorClassifier.append(5)
-            #print(5)
-        elif name[1] == 'sad':
-            vectorClassifier.append(6)
-            #print(6)
-        else:
-            vectorClassifier.append(0)
+        for i in range(0, len(self.vectorClassifier)):
+            if not (self.vectorClassifier[i] == 2):
+                self.y_disgust[i] = 0
+            else:
+                self.y_disgust[i] = 1
 
-    matrixVectors = np.asanyarray(matrixVectors)
-    vectorClassifier = np.asanyarray(vectorClassifier)
+        for i in range(0, len(self.vectorClassifier)):
+            if not(self.vectorClassifier[i] == 3):
+                self.y_fear[i] = 0
+            else:
+                self.y_fear[i] = 1
 
-    y_angry = np.zeros(vectorClassifier.shape)
-    y_disgust = np.zeros(vectorClassifier.shape)
-    y_fear = np.zeros(vectorClassifier.shape)
-    y_happy = np.zeros(vectorClassifier.shape)
-    y_neutral = np.zeros(vectorClassifier.shape)
-    y_sad = np.zeros(vectorClassifier.shape)
+        for i in range(0, len(self.vectorClassifier)):
+            if not(self.vectorClassifier[i] == 4):
+                self.y_happy[i] = 0
+            else:
+                self.y_happy[i] = 1
 
-    for i in range(0, len(vectorClassifier)):
-        if not(vectorClassifier[i] == 1):
-            y_angry[i] = 0
-        else:
-            y_angry[i] = 1
+        for i in range(0, len(self.vectorClassifier)):
+            if not(self.vectorClassifier[i] == 5):
+                self.y_neutral[i] = 0
+            else:
+                self.y_neutral[i] = 1
 
-    for i in range(0, len(vectorClassifier)):
-        if not (vectorClassifier[i] == 2):
-            y_disgust[i] = 0
-        else:
-            y_disgust[i] = 1
+        for i in range(0, len(self.vectorClassifier)):
+            if not(self.vectorClassifier[i] == 5):
+                self.y_sad[i] = 0
+            else:
+                self.y_sad[i] = 1
 
-    for i in range(0, len(vectorClassifier)):
-        if not(vectorClassifier[i] == 3):
-            y_fear[i] = 0
-        else:
-            y_fear[i] = 1
+        return self.matrixVectors, self.vectorClassifier
 
-    for i in range(0, len(vectorClassifier)):
-        if not(vectorClassifier[i] == 4):
-            y_happy[i] = 0
-        else:
-            y_happy[i] = 1
+    def svm_model(self, x, y):
+        model = svm.LinearSVC(random_state=0, tol=1e-5)
+        model.fit(x, y)
+        return model
 
-    for i in range(0, len(vectorClassifier)):
-        if not(vectorClassifier[i] == 5):
-            y_neutral[i] = 0
-        else:
-            y_neutral[i] = 1
-
-    for i in range(0, len(vectorClassifier)):
-        if not(vectorClassifier[i] == 5):
-            y_sad[i] = 0
-        else:
-            y_sad[i] = 1
-
-    return matrixVectors, vectorClassifier
-
-
-def svm_model(x, y):
-    model = svm.LinearSVC(random_state=0, tol=1e-5)
-    model.fit(x, y)
-
-    return model
-
-
-def plane_distance(plane, vector):
-    return np.linalg.norm(plane - vector)
+    def plane_distance(self, plane, vector):
+        return np.linalg.norm(plane - vector)
 
 
 if __name__ == '__main__':
     try:
-        svm_classifier()
+        classifier = SvmClassifier()
+        classifier.svm_classifier()
     except rospy.ROSInterruptException:
         pass
