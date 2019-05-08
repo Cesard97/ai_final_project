@@ -10,8 +10,9 @@ class Main:
 
     def __init__(self):
         self.dataFiles = []
-        self.kn = None
+        #self.kn = None
         self.kn_model = None
+        self.svm_model = None
 
         self.true_classes = []
         self.dataMatrix = []
@@ -46,9 +47,9 @@ class Main:
             v_tem = landmark['faceCoordinatesUnwarped']
             self.dataMatrix.append(v_tem)
 
-    def instance_creation(self):
+    def instance_creation(self, n=1):
         x, y = self.kn.training_data_prep()
-        self.kn_model = self.kn.model_creation(x, y)
+        self.kn_model = self.kn.model_creation(x, y, n)
         x, y = self.svm.training_data_prep()
         self.svm.model_creation(x)
 
@@ -58,7 +59,7 @@ class Main:
             aux = self.dataMatrix[i].T
             if aux.shape == (136, 1):
                 aux = aux.T
-            self.kn_prediction[i] = self.kn_model.predict(aux)
+            self.kn_prediction[i] = int(self.kn_model.predict(aux))
 
     def test_svm(self):
         self.svm_prediction = np.zeros(len(self.true_classes))
@@ -66,32 +67,70 @@ class Main:
             aux = self.dataMatrix[i].T
             if aux.shape == (136, 1):
                 aux = aux.T
-            self.kn_prediction[i] = self.svm.compute_emotion(aux)
-        print(self.kn_prediction)
+            self.svm_prediction[i] = self.svm.compute_emotion(aux)
 
     def error_percentage(self):
         kn_counter = 0
         svm_counter = 0
+        kn_percentage = 0.0
+        svm_percentage = 0.0
+
         for i in range(0, len(self.true_classes)):
+            #print(self.true_classes[i])
+            #print(self.kn_prediction[i])
+            #print(self.svm_prediction[i])
             if self.true_classes[i] == self.kn_prediction[i]:
                 kn_counter = kn_counter + 1
             if self.true_classes[i] == self.svm_prediction[i]:
                 svm_counter = svm_counter + 1
-        kn_percentage = kn_counter/len(self.true_classes)
-        svm_percentage = svm_counter / len(self.true_classes)
+
+        kn_percentage = 100 - kn_counter*100/len(self.true_classes)
+        svm_percentage = 100 - svm_counter*100/len(self.true_classes)
         # plt.bar([1, 2], kn_percentage, svm_percentage)
         # plt.show()
-        print(kn_percentage)
-        print(svm_percentage)
+
+        #print(kn_percentage)
+        #print(svm_percentage)
+
+        return kn_percentage
 
     def confusion_matrix(self):
-        pass
+        kn_confusion = np.zeros((7, 7))
+        svm_confusion = np.zeros((7, 7))
+        for i in range(0, len(self.true_classes)):
+            kn_confusion[self.true_classes[i]][self.kn_prediction[i]] = kn_confusion[self.true_classes[i]][self.kn_prediction[i]] + 1
+            svm_confusion[self.true_classes[i]][self.svm_prediction[i]] = svm_confusion[self.true_classes[i]][self.svm_prediction[i]] + 1
+
+        print(kn_confusion)
+        print(svm_confusion)
+
+    def optimizeKneig(self):
+        minError = 100
+        kOptimo = 0
+        self.data_reading()
+        for k in range(1, 700):
+            self.kn = KNeighbors()
+            self.svm = SvmClassifier()
+            self.instance_creation(k)
+            self.test_kn()
+            self.test_svm()
+            error = self.error_percentage()
+            if error < minError:
+                minError = error
+                kOptimo = k
+
+            print(k)
+
+        print(kOptimo)
+        print(minError)
 
 
 if __name__ == '__main__':
     main = Main()
-    main.data_reading()
-    main.instance_creation()
-    main.test_kn()
-    main.test_svm()
-    main.error_percentage()
+    #main.data_reading()
+    #main.instance_creation()
+    #main.test_kn()
+    #main.test_svm()
+    #main.error_percentage()
+    #main.confusion_matrix()
+    main.optimizeKneig()

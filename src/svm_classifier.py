@@ -122,7 +122,7 @@ class SvmClassifier:
                     posibleEmotionDistance[i] = distance[i]
 
             answer = np.argmax(posibleEmotionDistance)
-        return answer
+        return int(answer + 1)
 
     def training_data_prep(self):
         self.mean()

@@ -51,8 +51,8 @@ class KNeighbors:
             pub.publish(emotion)
             rate.sleep()
 
-    def model_creation(self, x, y):
-        neigh = KNeighborsClassifier(n_neighbors=150)
+    def model_creation(self, x, y,neig):
+        neigh = KNeighborsClassifier(n_neighbors=neig)
         neigh.fit(x, np.transpose(y))
         return neigh
 
