@@ -17,7 +17,7 @@ global training_data
 global target_data
 import math as m
 
-emotions = ['No emotion', 'Angry', 'Disgusted', 'Fear', 'Sad', 'Neutral','Happy']
+emotions = ['No emotion', 'Angry', 'Disgusted', 'Fear', 'Happy', 'Neutral','Sad']
 
 class neuralNetwork:
 
@@ -137,13 +137,13 @@ class neuralNetwork:
         ones_fear = ones_fear*3
         ones_fear = np.transpose(ones_fear)
         ones_happy = np.ones(len(happy))
-        ones_happy = ones_happy*6
+        ones_happy = ones_happy*4
         ones_happy = np.transpose(ones_happy)
         ones_neutral = np.ones(len(neutral))
         ones_neutral = ones_neutral*5
         ones_neutral = np.transpose(ones_neutral)
         ones_sad = np.ones(len(sad))
-        ones_sad = ones_sad*4
+        ones_sad = ones_sad*6
         ones_sad = np.transpose(ones_sad)
 
 
@@ -174,9 +174,7 @@ class neuralNetwork:
 
         model.add(Dense(50, input_shape=[136], activation='relu')) #one hiddel layer
         model.add(Dense(50, input_shape=[136], activation='relu'))
-        model.add(Dense(50, input_shape=[136], activation='relu'))
-        model.add(Dense(50, input_shape=[136], activation='relu'))
-        model.add(Dense(50, input_shape=[136], activation='relu'))
+        #model.add(Dense(50, input_shape=[136], activation='relu'))
         #model.add(Dense(50, input_dim=136, activation='relu'))
         #model.add(Dense(50, input_dim=136, activation='relu'))
         #model.add(Dense(50, input_dim=136, activation='relu'))
@@ -193,7 +191,7 @@ class neuralNetwork:
         np.savetxt("foo.csv", training_data, delimiter=",")
 
         model.compile(optimizer=opt, loss='mean_squared_error',metrics=['accuracy'])#['mean_absolute_error', 'mean_squared_error']
-        model.fit(training_data, target_data, epochs=2000, shuffle=False)
+        model.fit(training_data, target_data, epochs=3000, shuffle=False)
 
         scores = model.evaluate(training_data, target_data)
         print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
@@ -207,8 +205,6 @@ class neuralNetwork:
             element = np.transpose(np.matrix(element)) * (element*np.transpose(np.matrix(self.mediaP))/(element*np.transpose(np.matrix(element))))
             element = np.transpose(np.matrix(element)) - self.mediaP
 
-            
-
             emocion=model.predict(element).round()
 
             print(emocion)
@@ -220,6 +216,124 @@ class neuralNetwork:
         else:
             return 0
 
+    
+    def matrizConfusion(self):
+
+        confusion = np.zeros((7,7))
+        for element in self.nombresLandMark:
+            landmark = sc.loadmat(element)
+            vTem = landmark['faceCoordinatesUnwarped']
+            #print(self.mediaP.shape)
+            if vTem.shape == (1,136):
+                vTem = vTem.T
+            vTem = vTem[:,0] * (np.dot(vTem[:,0].T, self.mediaP) / (np.dot(vTem[:,0].T, vTem)))
+            vector = np.array([vTem - self.mediaP])
+            name = element.split("/")
+
+            if not m.isnan(vector[0,0]):
+                emocion = self.validation(vector)
+            else: 
+                emocion = 0
+
+            if name[1] == 'happy':
+                if emocion == 6:
+                    confusion[6,6] = confusion[6,6]+1
+                elif emocion == 4:
+                    confusion[6,4] = confusion[6,4]+1
+                elif emocion == 1:
+                    confusion[6,1] = confusion[6,1]+1
+                elif emocion == 3:
+                    confusion[6,3] = confusion[6,3]+1
+                elif emocion == 5:
+                    confusion[6,5] = confusion[6,5]+1
+                elif emocion == 2:
+                    confusion[6,2] = confusion[6,2]+1
+                else: 
+                    confusion[6,0] = confusion[6,0]+1
+            
+            elif name[2] == 'sad':
+                if emocion == 6:
+                    confusion[2,6] = confusion[2,6]+1
+                elif emocion == 4:
+                    confusion[2,4] = confusion[2,4]+1
+                elif emocion == 1:
+                    confusion[2,1] = confusion[2,1]+1
+                elif emocion == 3:
+                    confusion[2,3] = confusion[2,3]+1
+                elif emocion == 5:
+                    confusion[2,5] = confusion[2,5]+1
+                elif emocion == 2:
+                    confusion[2,2] = confusion[2,2]+1
+                else: 
+                    confusion[2,0] = confusion[2,0]+1
+
+
+            elif name[1] == 'angry':
+                if emocion == 6:
+                    confusion[1,6] = confusion[1,6]+1
+                elif emocion == 4:
+                    confusion[1,4] = confusion[1,4]+1
+                elif emocion == 1:
+                    confusion[1,1] = confusion[1,1]+1
+                elif emocion == 3:
+                    confusion[1,3] = confusion[1,3]+1
+                elif emocion == 5:
+                    confusion[1,5] = confusion[1,5]+1
+                elif emocion == 2:
+                    confusion[1,2] = confusion[1,2]+1
+                else: 
+                    confusion[1,0] = confusion[1,0]+1
+ 
+            elif name[1] == 'fear':
+                if emocion == 6:
+                    confusion[3,6] = confusion[3,6]+1
+                elif emocion == 4:
+                    confusion[3,4] = confusion[3,4]+1
+                elif emocion == 1:
+                    confusion[3,1] = confusion[3,1]+1
+                elif emocion == 3:
+                    confusion[3,3] = confusion[3,3]+1
+                elif emocion == 5:
+                    confusion[3,5] = confusion[3,5]+1
+                elif emocion == 2:
+                    confusion[3,2] = confusion[3,2]+1
+                else: 
+                    confusion[3,0] = confusion[3,0]+1
+
+            elif name[1] == 'neutral':
+                if emocion == 6:
+                    confusion[5,6] = confusion[5,6]+1
+                elif emocion == 4:
+                    confusion[5,4] = confusion[5,4]+1
+                elif emocion == 1:
+                    confusion[5,1] = confusion[5,1]+1
+                elif emocion == 3:
+                    confusion[5,3] = confusion[5,3]+1
+                elif emocion == 5:
+                    confusion[5,5] = confusion[5,5]+1
+                elif emocion == 2:
+                    confusion[5,2] = confusion[5,2]+1
+                else: 
+                    confusion[5,0] = confusion[5,0]+1
+            
+            elif name[1] == 'disgust':
+                if emocion == 6:
+                    confusion[2,6] = confusion[2,5]+1
+                elif emocion == 4:
+                    confusion[2,4] = confusion[2,4]+1
+                elif emocion == 1:
+                    confusion[2,1] = confusion[2,1]+1
+                elif emocion == 3:
+                    confusion[2,3] = confusion[2,3]+1
+                elif emocion == 5:
+                    confusion[2,5] = confusion[2,5]+1
+                elif emocion == 2:
+                    confusion[2,2] = confusion[2,2]+1
+                else: 
+                    confusion[2,0] = confusion[2,0]+1
+        return confusion
+
+
     def main(self):
         rospy.init_node('neural_network_validation', anonymous=False)
         rospy.Subscriber('features', Float32MultiArray, self.faturesCallBack)
@@ -228,6 +342,8 @@ class neuralNetwork:
         media = self.hallarMediaProcrustes()
         print(media.shape)
         self.training()
+        matriz = self.matrizConfusion()
+        print(matriz)
         rate.sleep()
         while not rospy.is_shutdown():
             emocion = self.validation(self.vector)

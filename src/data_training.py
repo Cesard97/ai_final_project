@@ -78,7 +78,6 @@ class dataTraining:
 				break
 		cv2.destroyAllWindows()
 
-
 	def data_training_py(self):
 		rospy.init_node('data_training', anonymous = True)
 		rospy.Subscriber('/naoqi_driver/camera/front/image_raw', Image, self.camaraCallBack)
@@ -88,6 +87,7 @@ class dataTraining:
 		while not rospy.is_shutdown():
 			self.showLandMarks()
 			rate.sleep()
+
 	
 if __name__ == '__main__':
 	data = dataTraining()

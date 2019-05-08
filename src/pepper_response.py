@@ -30,7 +30,7 @@ say_neutral = ['Estas muy serio. Te contare un chiste. Sabes por que Arnold Shua
              'Por que estas tan serio??',
              'no estes tan serio! Sonriele a la vida']
 say_sad = ['No estes triste. Te daria un abrazo, pero no control bien mis movimientos',
-             'Como dijo Clea Cruz: Ay! No hay que llorar, que la vida es un carnaval... Y es mas bello vivir cantando',
+             'Como dijo Celia Cruz: Ay! No hay que llorar, que la vida es un carnaval... Y es mas bello vivir cantando',
              'Creo que estes triste. Te contare un chiste: Sabes cual es el colmo de un robot? Tener nervios de acero.']
 
 
@@ -42,6 +42,10 @@ def gnc_callback(data):
 def nn_callback(data):
     global nn
     nn = data.data
+    if nn == 4:
+        nn = 6
+    elif nn == 6:
+        nn = 4
 
 
 def kn_callback(data):
@@ -74,6 +78,9 @@ def compute_votes():
     votes = [angry, disgust, fear, happy, neutral, sad]
     emotion = np.argmax(votes) + 1
 
+    if np.sum(response) == 0:
+        emotion = 0
+
     print("Angry: " + str(angry))
     print("Disgust: " + str(disgust))
     print("Fear: " + str(fear))
@@ -92,7 +99,7 @@ def pepper_node():
     rospy.Subscriber('KN_response', Int16, kn_callback)
     rospy.Subscriber('SVM_response', Int16, svm_callback)
     pub = rospy.Publisher('speech', String, queue_size=10)
-    rate = rospy.Rate(1)
+    rate = rospy.Rate(10)
     key = Keyreader()
     key.start()
     while not rospy.is_shutdown():
@@ -108,7 +115,7 @@ def pepper_node():
 
 def pepper_response(emotion):
     num = randint(0, 2)
-    pepper_say = 'No he reconocido tu emocion'
+    pepper_say = ''
     if emotion == 1:
         pepper_say = say_angry[num]
     if emotion == 2:

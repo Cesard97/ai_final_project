@@ -1,6 +1,7 @@
 import glob
 from svm_classifier import SvmClassifier
 from k_neighbors import KNeighbors
+from gncNuevo import gnc
 import matplotlib.pyplot as plt
 import scipy.io as sc
 import numpy as np
@@ -27,6 +28,7 @@ class Main:
         self.kn_prediction_training = None
         self.kn = KNeighbors()
         self.svm = SvmClassifier()
+        self.gnc = gnc()
 
     def data_reading(self):
         for file in glob.glob("validation/happy/*.mat"):
@@ -169,6 +171,10 @@ class Main:
         print(kn_confusion)
         print(svm_confusion)
 
+    def confusion_matrix_gnc(self):
+        gnc_matriz = self.gnc.matrizConfusion()
+        print(gnc_matriz)
+
     def optimizeKneig(self):
         # Error de entrenamiento
         minError = 100
@@ -231,3 +237,4 @@ if __name__ == '__main__':
     #main.error_percentage_training()
     #main.confusion_matrix()
     main.optimizeKneig()
+    main.confusion_matrix_gnc()
