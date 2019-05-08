@@ -86,7 +86,7 @@ def compute_votes():
 
 
 def pepper_node():
-    rospy.init_node('pepper_response', anonymous=True)
+    rospy.init_node('pepper_response', anonymous=False)
     rospy.Subscriber('gnc_response', Int16, gnc_callback)
     rospy.Subscriber('NN_response', Int16, nn_callback)
     rospy.Subscriber('KN_response', Int16, kn_callback)

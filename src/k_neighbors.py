@@ -24,7 +24,7 @@ class KNeighbors:
         rospy.init_node('k_neighbors', anonymous=False)
         rospy.Subscriber('features', Float32MultiArray, self.features_callback)
         pub = rospy.Publisher('KN_response', Int16, queue_size=1)
-        rate = rospy.Rate(1)
+        rate = rospy.Rate(10)
         x, y = self.training_data_prep()
         neigh = self.model_creation(x, y)
         while not rospy.is_shutdown():
@@ -51,7 +51,7 @@ class KNeighbors:
             pub.publish(emotion)
             rate.sleep()
 
-    def model_creation(self, x, y,neig):
+    def model_creation(self, x, y, neig=13):
         neigh = KNeighborsClassifier(n_neighbors=neig)
         neigh.fit(x, np.transpose(y))
         return neigh
