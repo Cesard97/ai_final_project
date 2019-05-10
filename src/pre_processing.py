@@ -30,7 +30,7 @@ class preProcesing:
         detector = dlib.get_frontal_face_detector()
         predictor = dlib.shape_predictor('shape_predictor.dat')
         # Node init
-        rospy.init_node('pre_proccesing', anonymous=True)
+        rospy.init_node('pre_proccesing', anonymous=False)
         # Pub and Subs
         pubFeatures = rospy.Publisher('features', Float32MultiArray, queue_size=100)
         rospy.Subscriber("/naoqi_driver/camera/front/image_raw", Image, self.cameraCallback)
@@ -71,11 +71,17 @@ class preProcesing:
             for i in range(68,136):
                 preProcessLandmarks[i] = (self.landmarks[i-68,1])
 
-            preProcessLandmarks = preprocessing.scale(preProcessLandmarks)
-            featureVector.data = preProcessLandmarks
-            pubFeatures.publish(featureVector)
-            print(featureVector)
+            print(len(rects))
+            if len(rects) != 0:
+                preProcessLandmarks = preprocessing.scale(preProcessLandmarks)
+                featureVector.data = preProcessLandmarks
+                print("Publicando datos de Landmarks")
+            else:
+                featureVector.data = np.zeros((136,1))
+                print("No hay nadie en la camara")
 
+            #print(featureVector)
+            pubFeatures.publish(featureVector)
 
             # show the output image with the face detections + facial landmarks
             cv2.imshow("Output", self.image)
@@ -83,7 +89,7 @@ class preProcesing:
             if key == ord("q"):
                 break
 
-        rate.sleep()
+            rate.sleep()
         cv2.destroyAllWindows()
 
 
