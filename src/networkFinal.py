@@ -193,7 +193,7 @@ class neuralNetwork:
         np.savetxt("foo.csv", training_data, delimiter=",")
 
         model.compile(optimizer=opt, loss='mean_squared_error',metrics=['accuracy'])#['mean_absolute_error', 'mean_squared_error']
-        model.fit(training_data, target_data, epochs=2000, shuffle=False)
+        model.fit(training_data, target_data, epochs=3500, shuffle=False)
 
         scores = model.evaluate(training_data, target_data)
         print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
